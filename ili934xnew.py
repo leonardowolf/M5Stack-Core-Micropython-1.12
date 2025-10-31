@@ -20,7 +20,7 @@ import framebuf
 from micropython import const
 
 _RDDSDR = const(0x0f) # Read Display Self-Diagnostic Result
-_SLPOUT = const(0x11) # Sleep Out
+_SLPOUT = const(0x11) # Sleep Out/WAKE
 _GAMSET = const(0x26) # Gamma Set
 _DISPOFF = const(0x28) # Display Off
 _DISPON = const(0x29) # Display On
@@ -46,6 +46,15 @@ _DISCTRL = const(0xb6) # Display Function Control
 _ENA3G = const(0xf2) # Enable 3G
 _PGAMCTRL = const(0xe0) # Positive Gamma Control
 _NGAMCTRL = const(0xe1) # Negative Gamma Control
+_CMD_DISPLAY_INVERSION_OFF = const(0x20)
+_CMD_DISPLAY_INVERSION_ON = const(0x21)
+_CMD_DISPLAY_ON = const(0x29)
+_CMD_DISPLAY_OFF = const(0x28)
+_CMD_COLUMN_SET = const(0x2a)
+_CMD_PAGE_SET = const(0x2b)
+_CMD_RAM_WRITE = const(0x2c)
+_CMD_LINE_SET = const(0x37)
+
 
 _CHUNK = const(1024) #maximum number of pixels per spi write
 
@@ -54,11 +63,12 @@ def color565(r, g, b):
 
 class ILI9341:
 
-    def __init__(self, spi, cs, dc, rst, w, h, r):
+    def __init__(self, spi, cs, dc, rst, bl, w, h, r):
         self.spi = spi
         self.cs = cs
         self.dc = dc
         self.rst = rst
+        self.bl = bl
         self._init_width = w
         self._init_height = h
         self.width = w
@@ -107,8 +117,12 @@ class ILI9341:
             (_PWCTRL1, b"\x23"),
             (_PWCTRL2, b"\x10"),
             (_VMCTRL1, b"\x3e\x28"),
-            (_VMCTRL2, b"\x86")):
+            (_VMCTRL2, b"\x86"),  # VCM Control 2
+            (0x36, b'\x48')  # Memory Access Control
+            
+            ):
             self._write(command, data)
+            self._write(_SLPOUT)
 
         if self.rotation == 0:                  # 0 deg
             self._write(_MADCTL, b"\x48")
@@ -157,6 +171,14 @@ class ILI9341:
         self._write(_SLPOUT)
         time.sleep_ms(120)
         self._write(_DISPON)
+        
+    def on(self):
+        self._write(_CMD_DISPLAY_ON)
+        self.bl.value(1)
+
+    def off(self):
+        self.bl.value(0)
+        self._write(_CMD_DISPLAY_OFF)
 
     def reset(self):
         self.rst(0)
