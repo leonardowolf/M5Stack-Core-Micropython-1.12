@@ -19,7 +19,7 @@ d.set_font(tt14)
 d.set_pos(0,0)
 d.print("why hello there")
 
-sd = SDCard(slot=3,freq=20000000,sck=Pin(18), mosi=Pin(23), miso=Pin(19), cs=Pin(4))
+sd = SDCard(slot=3,freq=20000000,sck=Pin(m5stack.SD_SCK_PIN), mosi=Pin(m5stack.SD_MOSI_PIN), miso=Pin(m5stack.SD_MISO_PIN), cs=Pin(m5stack.SD_CS_PIN))
 os.mount(sd,"/sd")
 print(os.listdir("sd"))
 

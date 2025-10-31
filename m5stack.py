@@ -22,3 +22,8 @@ TFT_MOSI_PIN = const(23)
 TFT_CLK_PIN = const(18)
 TFT_RST_PIN = const(33)
 TFT_MISO_PIN = const(19)
+
+SD_CS_PIN = const(4)
+SD_MOSI_PIN = const(23)
+SD_MISO_PIN = const(19)
+SD_SCK_PIN = const(18)
